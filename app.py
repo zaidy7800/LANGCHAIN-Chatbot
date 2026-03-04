@@ -1,17 +1,24 @@
 from langchain_ollama import ChatOllama
-from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
 
+# Load model
 llm = ChatOllama(
     model="qwen2.5-coder:3b",
     temperature=0.7,
 )
 
-# system prompt
-messages = [
-    SystemMessage(content="You are a helpful assistant that helps translate English to french."),
-    HumanMessage(content="Hello, how are youu?"),
-]
+# Create prompt template
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a helpful AI assistant."),
+    ("human", "{question}"),
+])
 
-response = llm.invoke(messages)
+# Create chain (Correct order)
+chain = prompt | llm | StrOutputParser()
 
-print(response.content)
+# Invoke chain
+response = chain.invoke({"question": "Hello, how are you?"})
+
+# Print result
+print(response)
